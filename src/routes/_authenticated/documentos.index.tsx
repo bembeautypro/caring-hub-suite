@@ -461,7 +461,15 @@ function DocCard({
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
-            <p className="truncate text-base font-semibold">{doc.title}</p>
+            <div className="flex min-w-0 items-center gap-1.5">
+              {doc.is_pinned && (
+                <Star
+                  className="h-4 w-4 shrink-0 fill-primary text-primary"
+                  aria-label="Salvo offline"
+                />
+              )}
+              <p className="truncate text-base font-semibold">{doc.title}</p>
+            </div>
             <button
               type="button"
               onClick={onOpenActions}
@@ -471,7 +479,10 @@ function DocCard({
               <MoreVertical className="h-5 w-5" />
             </button>
           </div>
-          <p className="mt-0.5 text-xs text-muted-foreground">{label}</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {label}
+            {doc.is_pinned && <span className="ml-1.5 text-primary">· offline</span>}
+          </p>
           {(dateStr || doc.institution || doc.doctor_name) && (
             <p className="mt-1 text-xs text-muted-foreground">
               {[dateStr, doc.institution, doc.doctor_name].filter(Boolean).join(" · ")}
