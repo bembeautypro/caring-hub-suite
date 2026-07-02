@@ -1,28 +1,50 @@
-## Triagem — Amparo
+## Objetivo
 
-### 1. Tamanho
-- **116** arquivos TS/TSX em `src/` (~28 rotas de página + 2 endpoints `/api/public/*`).
-- **29** arquivos de rota (incluindo gate `_authenticated/`, 4 onboarding, auth, landing, design system).
-- **11** migrations SQL → **18** tabelas no Postgres (`access_logs`, `appointments`, `clinical_events`, `documents`, `emergency_contacts`, `emergency_links`, `emergency_rate_limits`, `families`, `family_members`, `invitations`, `medication_doses`, `medication_reminder_log`, `medications`, `patient_allergies`, `patient_conditions`, `patients`, `profiles`, `push_subscriptions`).
+Usuário marca documentos como "favoritos". Ao marcar, o arquivo é baixado e guardado no dispositivo (IndexedDB). No viewer, se o arquivo estiver cacheado, ele abre mesmo sem internet e mesmo depois que a URL assinada expira.
 
-### 2. Stack real detectada
-- **Frontend**: TanStack Start 1.x + React 19 + Vite 7 + Tailwind v4 + shadcn/Radix.
-- **Roteamento**: file-based em `src/routes/` com gate único `_authenticated/route.tsx` (`ssr:false`, `beforeLoad` checa Supabase).
-- **Backend**: Supabase (Postgres + Auth + Storage `medical-documents` privado). 100% via `createServerFn` + `supabaseAdmin` lazy-loaded; sem Edge Functions.
-- **Deploy**: Nitro preset `cloudflare_module` (alinhado à stack obrigatória — divergência Vercel apontada no AUDIT.md já foi corrigida).
-- **Extras**: PWA (manifest + `public/sw.js` para Web Push VAPID), `react-pdf` lazy, `pg_cron` para purga LGPD e disparo de lembretes a cada 5min, Realtime em `medications/appointments/medication_doses`.
+Sem instalar `vite-plugin-pwa`. Sem service worker de app-shell. Isso mantém o preview do Lovable seguro e reduz a superfície de mudança.
 
-### 3. O build passa?
-**Sim.** `bun run build` ✓ em ~7.5s, preset `cloudflare_module`, sem erros nem warnings de typecheck. Maior chunk: `pdfjs-dist` 777kB (lazy, isolado).
+## O que muda para o usuário
 
-### 4. Três maiores riscos visíveis
-1. **Superfície pública de emergência (`/e/$token`)**: endpoint compartilhável por QR retorna alergias, medicamentos, contatos e signed URLs de documentos. Há rate-limit e TTL curto (5min), mas o vazamento do QR = vazamento clínico. Token nunca rotaciona automaticamente.
-2. **Push notifications artesanais**: criptografia AES-128-GCM + VAPID JWT ES256 implementados à mão em `src/lib/push.server.ts` para rodar no Worker. Funciona, mas é superfície sensível sem testes — qualquer bug silencioso quebra lembretes (que é o core do produto para idosos).
-3. **Bundle PDF no servidor**: `pdfjs-dist` (777 kB) aparece em `dist/server/_libs/` mesmo com rota `ssr:false`. Em runtime Worker o módulo nunca é executado, mas ocupa orçamento de bundle do Worker (limite 10 MB compressed). Margem ainda OK, mas é o primeiro a estourar se entrar mais 1-2 libs pesadas.
+- Cada card de documento ganha um ícone de estrela e uma ação "Salvar offline" / "Remover offline" no bottom sheet.
+- Documentos favoritados mostram badge "Offline" no card.
+- No viewer, se estiver sem internet, o arquivo favoritado abre normalmente. Não favoritados mostram mensagem "Sem conexão — favorite para ver offline".
+- Nada de cache silencioso: só é guardado o que o usuário marcou. Bom para LGPD.
 
-Riscos menores aceitos: `search_vector` tipado como `unknown` em `types.ts`; SW sem estratégia offline; deploy real em Workers **NÃO VERIFICÁVEL** sem publicar.
+## Estrutura técnica
 
-### 5. Veredito
-**RECUPERÁVEL** — na prática, **já está recuperado**.
+### Banco (1 migration curta)
 
-Justificativa: build verde, roadmap P0–P4 fechado (SYSTEM_STATUS 9.6/10), gate de auth centralizado, RLS + GRANTs em todas as 18 tabelas, soft delete consistente (37 ocorrências), snapshots forenses em `access_logs`, enums front↔DB alinhados. Reescrever custaria semanas para reproduzir feature parity (família multiusuário, convites, emergência pública, push, PWA, FTS) que aqui já passa nos checks automáticos. O esforço restante é **endurecimento** (rotação de token de emergência, testes do pipeline de push, observabilidade em produção), não reconstrução.
+- `documents.is_pinned boolean not null default false`.
+- Sem novas policies: as existentes já cobrem UPDATE.
+- Publication `supabase_realtime` já inclui `documents` (Parte 1), então favoritar em um dispositivo aparece em outro.
+
+### Cliente
+
+- `src/lib/offline-docs.ts`: wrapper mínimo sobre IndexedDB (sem dependência nova — API nativa) com `putBlob(id, blob, mime)`, `getBlob(id)`, `deleteBlob(id)`, `hasBlob(id)`, `listIds()`.
+- `src/hooks/useOfflineDoc.ts`: hook que retorna `{ hasOffline, saveOffline, removeOffline, blobUrl }` para um documento. Cria e revoga `URL.createObjectURL` corretamente.
+- Ação "Salvar offline" no sheet de `documentos.index.tsx`: baixa via `getSignedMedicalDocUrl` + `fetch`, grava no IDB, seta `is_pinned=true`. "Remover offline": deleta blob + `is_pinned=false`.
+- `documentos.$id.tsx`: se `hasBlob(id)`, usa `blobUrl` no viewer/img direto (sem depender de signed URL). Se offline e sem blob, mostra estado vazio com CTA "Favoritar quando voltar online".
+- Card mostra estrela preenchida quando `is_pinned`.
+
+### Sincronização de cache com o banco
+
+- Ao carregar a lista, comparar `is_pinned=true` do banco com `listIds()` do IDB. Se um documento foi favoritado em outro dispositivo, baixar em background. Se foi desmarcado, apagar do IDB local.
+- Se o documento foi arquivado (soft delete), remover o blob local. Realtime da Parte 1 dispara o refresh que executa essa reconciliação.
+
+### Limites e proteções
+
+- Limite de 20 documentos offline por dispositivo (aviso no UI ao passar). Impede encher o disco do celular.
+- Bloquear favoritar arquivos maiores que 20 MB (mesmo limite do upload).
+- IndexedDB é por origem — publicado e preview têm caches separados; isso é ok.
+
+## O que NÃO faz parte deste plano
+
+- App-shell offline (navegação sem internet). Requer `vite-plugin-pwa` e a skill de PWA do Lovable. Fica para uma segunda rodada se você quiser.
+- Sync bidirecional de edições feitas offline. O app continua exigindo internet para editar/uploadar.
+- Push de "arquivo pronto offline" — o download é síncrono no clique.
+
+## Riscos
+
+- iOS Safari limita IndexedDB em ~1 GB por origem e pode purgar em pressão de disco; documentar no README que "offline" é best-effort.
+- Se o usuário limpar dados do site, os favoritos offline somem (mas o flag `is_pinned` no banco fica — reconciliação baixa de novo).
