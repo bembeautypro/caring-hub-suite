@@ -363,6 +363,14 @@ function DocumentosList() {
               onClick={() => actionDoc && handleView(actionDoc)}
             />
             <ActionButton
+              label={actionDoc?.is_pinned ? "Remover offline" : "Salvar offline"}
+              onClick={() => {
+                if (!actionDoc) return;
+                if (actionDoc.is_pinned) void unpinDocument(actionDoc);
+                else void pinDocument(actionDoc);
+              }}
+            />
+            <ActionButton
               label="Editar metadados"
               onClick={() => {
                 if (actionDoc) navigate({ to: `/documentos/${actionDoc.id}/editar` as never });
