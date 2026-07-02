@@ -77,6 +77,7 @@ type Document = {
   document_date: string | null;
   institution: string | null;
   doctor_name: string | null;
+  is_pinned: boolean;
 };
 
 const TYPE_META: Record<DocType, { label: string; Icon: React.ElementType }> = {
