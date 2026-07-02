@@ -12,11 +12,21 @@ import {
   File,
   Plus,
   Search,
+  Star,
 } from "lucide-react";
 import { toast } from "sonner";
 
 import { supabase } from "@/integrations/supabase/client";
 import { searchDocuments } from "@/lib/documentos";
+import { getSignedMedicalDocUrl } from "@/lib/supabase/storage";
+import {
+  putBlob,
+  deleteBlob,
+  listIds,
+  countBlobs,
+  OFFLINE_DOC_LIMIT,
+  OFFLINE_DOC_MAX_BYTES,
+} from "@/lib/offline-docs";
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
