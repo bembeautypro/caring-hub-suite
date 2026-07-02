@@ -9,7 +9,7 @@ const SEARCH_VECTOR_COLUMN = "search_vector";
 const SEARCH_CONFIG = "portuguese";
 
 export const DOCUMENT_LIST_COLUMNS =
-  "id, title, type, file_path, file_mime_type, document_date, institution, doctor_name" as const;
+  "id, title, type, file_path, file_mime_type, document_date, institution, doctor_name, is_pinned" as const;
 
 export type DocumentListRow = {
   id: string;
@@ -20,6 +20,7 @@ export type DocumentListRow = {
   document_date: string | null;
   institution: string | null;
   doctor_name: string | null;
+  is_pinned: boolean;
 };
 
 export function searchDocuments(params: { patientId: string; query?: string }) {
