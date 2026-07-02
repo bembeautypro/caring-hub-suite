@@ -246,6 +246,7 @@ export type Database = {
           file_size_bytes: number | null
           id: string
           institution: string | null
+          is_pinned: boolean
           ocr_text: string | null
           patient_id: string | null
           search_vector: unknown
@@ -269,6 +270,7 @@ export type Database = {
           file_size_bytes?: number | null
           id?: string
           institution?: string | null
+          is_pinned?: boolean
           ocr_text?: string | null
           patient_id?: string | null
           search_vector?: unknown
@@ -292,6 +294,7 @@ export type Database = {
           file_size_bytes?: number | null
           id?: string
           institution?: string | null
+          is_pinned?: boolean
           ocr_text?: string | null
           patient_id?: string | null
           search_vector?: unknown
