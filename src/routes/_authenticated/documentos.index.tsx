@@ -181,11 +181,102 @@ function DocumentosList() {
       toast.error(error.message);
       return;
     }
+    // Arquivado: remove cache offline local também.
+    void deleteBlob(doc.id);
     toast.success("Documento arquivado.");
     setToArchive(null);
     setActionDoc(null);
     void load(searchQuery);
   }
+
+  async function pinDocument(doc: Document) {
+    setActionDoc(null);
+    try {
+      const cached = await countBlobs();
+      if (cached >= OFFLINE_DOC_LIMIT) {
+        toast.error(
+          `Limite de ${OFFLINE_DOC_LIMIT} documentos offline atingido neste dispositivo.`,
+        );
+        return;
+      }
+      toast.loading("Baixando para uso offline…", { id: `pin-${doc.id}` });
+      const url = await getSignedMedicalDocUrl(doc.file_path, 300);
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`Falha no download (${res.status}).`);
+      const blob = await res.blob();
+      if (blob.size > OFFLINE_DOC_MAX_BYTES) {
+        toast.error("Arquivo excede 20 MB — não pode ser salvo offline.", {
+          id: `pin-${doc.id}`,
+        });
+        return;
+      }
+      await putBlob(doc.id, blob, doc.file_mime_type ?? blob.type ?? "application/octet-stream");
+      const { error } = await supabase
+        .from("documents")
+        .update({ is_pinned: true })
+        .eq("id", doc.id);
+      if (error) throw error;
+      toast.success("Disponível offline.", { id: `pin-${doc.id}` });
+      void load(searchQuery);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Erro ao salvar offline.";
+      toast.error(msg, { id: `pin-${doc.id}` });
+    }
+  }
+
+  async function unpinDocument(doc: Document) {
+    setActionDoc(null);
+    await deleteBlob(doc.id);
+    const { error } = await supabase
+      .from("documents")
+      .update({ is_pinned: false })
+      .eq("id", doc.id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Removido do offline.");
+    void load(searchQuery);
+  }
+
+  // Reconciliação: se o flag do banco diverge do IDB local, sincroniza.
+  // - Pinned no banco mas sem blob → baixa em background.
+  // - Blob local órfão (não está mais pinned ou foi arquivado) → apaga.
+  useEffect(() => {
+    if (!docs) return;
+    let cancelled = false;
+    (async () => {
+      const localIds = new Set(await listIds());
+      if (cancelled) return;
+      const remotePinned = new Set(docs.filter((d) => d.is_pinned).map((d) => d.id));
+
+      // Órfãos: no IDB mas não pinned na lista atual.
+      for (const id of localIds) {
+        if (!remotePinned.has(id) && docs.some((d) => d.id === id)) {
+          void deleteBlob(id);
+        }
+      }
+      // Faltantes: pinned no banco mas sem blob local.
+      for (const doc of docs) {
+        if (!doc.is_pinned || localIds.has(doc.id)) continue;
+        try {
+          const url = await getSignedMedicalDocUrl(doc.file_path, 300);
+          const res = await fetch(url);
+          if (!res.ok) continue;
+          const blob = await res.blob();
+          if (blob.size > OFFLINE_DOC_MAX_BYTES) continue;
+          if (cancelled) return;
+          await putBlob(doc.id, blob, doc.file_mime_type ?? blob.type ?? "application/octet-stream");
+        } catch {
+          /* silencioso — reconciliação é best-effort */
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [docs]);
+
 
   const filtered =
     filterType === "all" ? (docs ?? []) : (docs ?? []).filter((d) => d.type === filterType);
