@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as McpRouteImport } from './routes/mcp'
 import { Route as DesignRouteImport } from './routes/design'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
@@ -21,6 +22,8 @@ import { Route as AuthenticatedHistoricoRouteImport } from './routes/_authentica
 import { Route as AuthenticatedFamiliaRouteImport } from './routes/_authenticated/familia'
 import { Route as AuthenticatedEmergenciaRouteImport } from './routes/_authenticated/emergencia'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as Char91DotwellKnownChar93OauthProtectedResourceRouteImport } from './routes/[.well-known]/oauth-protected-resource'
+import { Route as Char91DotmcpChar93ListToolsRouteImport } from './routes/[.mcp]/list-tools'
 import { Route as AuthenticatedMedicamentosIndexRouteImport } from './routes/_authenticated/medicamentos.index'
 import { Route as AuthenticatedDocumentosIndexRouteImport } from './routes/_authenticated/documentos.index'
 import { Route as AuthenticatedAgendaIndexRouteImport } from './routes/_authenticated/agenda.index'
@@ -34,12 +37,19 @@ import { Route as AuthenticatedEventosNovoRouteImport } from './routes/_authenti
 import { Route as AuthenticatedDocumentosNovoRouteImport } from './routes/_authenticated/documentos.novo'
 import { Route as AuthenticatedDocumentosIdRouteImport } from './routes/_authenticated/documentos.$id'
 import { Route as AuthenticatedAgendaNovaRouteImport } from './routes/_authenticated/agenda.nova'
+import { Route as Char91DotmcpChar93InvokeToolToolRouteImport } from './routes/[.mcp]/invoke-tool/$tool'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as ApiPublicHooksSendMedicationRemindersRouteImport } from './routes/api/public/hooks/send-medication-reminders'
 import { Route as ApiPublicHooksDoseActionRouteImport } from './routes/api/public/hooks/dose-action'
 import { Route as AuthenticatedMedicamentosIdEditarRouteImport } from './routes/_authenticated/medicamentos.$id.editar'
 import { Route as AuthenticatedEventosIdEditarRouteImport } from './routes/_authenticated/eventos.$id.editar'
 import { Route as AuthenticatedAgendaIdEditarRouteImport } from './routes/_authenticated/agenda.$id.editar'
 
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DesignRoute = DesignRouteImport.update({
   id: '/design',
   path: '/design',
@@ -99,6 +109,18 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const Char91DotwellKnownChar93OauthProtectedResourceRoute =
+  Char91DotwellKnownChar93OauthProtectedResourceRouteImport.update({
+    id: '/.well-known/oauth-protected-resource',
+    path: '/.well-known/oauth-protected-resource',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const Char91DotmcpChar93ListToolsRoute =
+  Char91DotmcpChar93ListToolsRouteImport.update({
+    id: '/.mcp/list-tools',
+    path: '/.mcp/list-tools',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AuthenticatedMedicamentosIndexRoute =
   AuthenticatedMedicamentosIndexRouteImport.update({
     id: '/medicamentos/',
@@ -175,6 +197,17 @@ const AuthenticatedAgendaNovaRoute = AuthenticatedAgendaNovaRouteImport.update({
   path: '/agenda/nova',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const Char91DotmcpChar93InvokeToolToolRoute =
+  Char91DotmcpChar93InvokeToolToolRouteImport.update({
+    id: '/.mcp/invoke-tool/$tool',
+    path: '/.mcp/invoke-tool/$tool',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicHooksSendMedicationRemindersRoute =
   ApiPublicHooksSendMedicationRemindersRouteImport.update({
     id: '/api/public/hooks/send-medication-reminders',
@@ -209,6 +242,9 @@ const AuthenticatedAgendaIdEditarRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/design': typeof DesignRoute
+  '/mcp': typeof McpRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/emergencia': typeof AuthenticatedEmergenciaRoute
   '/familia': typeof AuthenticatedFamiliaRoute
@@ -218,6 +254,8 @@ export interface FileRoutesByFullPath {
   '/auth/registro': typeof AuthRegistroRoute
   '/convite/$token': typeof ConviteTokenRoute
   '/e/$token': typeof ETokenRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/agenda/nova': typeof AuthenticatedAgendaNovaRoute
   '/documentos/$id': typeof AuthenticatedDocumentosIdRoute
   '/documentos/novo': typeof AuthenticatedDocumentosNovoRoute
@@ -240,6 +278,9 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/design': typeof DesignRoute
+  '/mcp': typeof McpRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/emergencia': typeof AuthenticatedEmergenciaRoute
   '/familia': typeof AuthenticatedFamiliaRoute
@@ -249,6 +290,8 @@ export interface FileRoutesByTo {
   '/auth/registro': typeof AuthRegistroRoute
   '/convite/$token': typeof ConviteTokenRoute
   '/e/$token': typeof ETokenRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/agenda/nova': typeof AuthenticatedAgendaNovaRoute
   '/documentos/$id': typeof AuthenticatedDocumentosIdRoute
   '/documentos/novo': typeof AuthenticatedDocumentosNovoRoute
@@ -273,6 +316,9 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/design': typeof DesignRoute
+  '/mcp': typeof McpRoute
+  '/.mcp/list-tools': typeof Char91DotmcpChar93ListToolsRoute
+  '/.well-known/oauth-protected-resource': typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/emergencia': typeof AuthenticatedEmergenciaRoute
   '/_authenticated/familia': typeof AuthenticatedFamiliaRoute
@@ -282,6 +328,8 @@ export interface FileRoutesById {
   '/auth/registro': typeof AuthRegistroRoute
   '/convite/$token': typeof ConviteTokenRoute
   '/e/$token': typeof ETokenRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
+  '/.mcp/invoke-tool/$tool': typeof Char91DotmcpChar93InvokeToolToolRoute
   '/_authenticated/agenda/nova': typeof AuthenticatedAgendaNovaRoute
   '/_authenticated/documentos/$id': typeof AuthenticatedDocumentosIdRoute
   '/_authenticated/documentos/novo': typeof AuthenticatedDocumentosNovoRoute
@@ -306,6 +354,9 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/design'
+    | '/mcp'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/dashboard'
     | '/emergencia'
     | '/familia'
@@ -315,6 +366,8 @@ export interface FileRouteTypes {
     | '/auth/registro'
     | '/convite/$token'
     | '/e/$token'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
     | '/agenda/nova'
     | '/documentos/$id'
     | '/documentos/novo'
@@ -337,6 +390,9 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/design'
+    | '/mcp'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/dashboard'
     | '/emergencia'
     | '/familia'
@@ -346,6 +402,8 @@ export interface FileRouteTypes {
     | '/auth/registro'
     | '/convite/$token'
     | '/e/$token'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
     | '/agenda/nova'
     | '/documentos/$id'
     | '/documentos/novo'
@@ -369,6 +427,9 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/design'
+    | '/mcp'
+    | '/.mcp/list-tools'
+    | '/.well-known/oauth-protected-resource'
     | '/_authenticated/dashboard'
     | '/_authenticated/emergencia'
     | '/_authenticated/familia'
@@ -378,6 +439,8 @@ export interface FileRouteTypes {
     | '/auth/registro'
     | '/convite/$token'
     | '/e/$token'
+    | '/.lovable/oauth/consent'
+    | '/.mcp/invoke-tool/$tool'
     | '/_authenticated/agenda/nova'
     | '/_authenticated/documentos/$id'
     | '/_authenticated/documentos/novo'
@@ -402,16 +465,28 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   DesignRoute: typeof DesignRoute
+  McpRoute: typeof McpRoute
+  Char91DotmcpChar93ListToolsRoute: typeof Char91DotmcpChar93ListToolsRoute
+  Char91DotwellKnownChar93OauthProtectedResourceRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthRegistroRoute: typeof AuthRegistroRoute
   ConviteTokenRoute: typeof ConviteTokenRoute
   ETokenRoute: typeof ETokenRoute
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
+  Char91DotmcpChar93InvokeToolToolRoute: typeof Char91DotmcpChar93InvokeToolToolRoute
   ApiPublicHooksDoseActionRoute: typeof ApiPublicHooksDoseActionRoute
   ApiPublicHooksSendMedicationRemindersRoute: typeof ApiPublicHooksSendMedicationRemindersRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/design': {
       id: '/design'
       path: '/design'
@@ -495,6 +570,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/.well-known/oauth-protected-resource': {
+      id: '/.well-known/oauth-protected-resource'
+      path: '/.well-known/oauth-protected-resource'
+      fullPath: '/.well-known/oauth-protected-resource'
+      preLoaderRoute: typeof Char91DotwellKnownChar93OauthProtectedResourceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.mcp/list-tools': {
+      id: '/.mcp/list-tools'
+      path: '/.mcp/list-tools'
+      fullPath: '/.mcp/list-tools'
+      preLoaderRoute: typeof Char91DotmcpChar93ListToolsRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/medicamentos/': {
       id: '/_authenticated/medicamentos/'
@@ -586,6 +675,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/agenda/nova'
       preLoaderRoute: typeof AuthenticatedAgendaNovaRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/.mcp/invoke-tool/$tool': {
+      id: '/.mcp/invoke-tool/$tool'
+      path: '/.mcp/invoke-tool/$tool'
+      fullPath: '/.mcp/invoke-tool/$tool'
+      preLoaderRoute: typeof Char91DotmcpChar93InvokeToolToolRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/public/hooks/send-medication-reminders': {
       id: '/api/public/hooks/send-medication-reminders'
@@ -683,10 +786,16 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   DesignRoute: DesignRoute,
+  McpRoute: McpRoute,
+  Char91DotmcpChar93ListToolsRoute: Char91DotmcpChar93ListToolsRoute,
+  Char91DotwellKnownChar93OauthProtectedResourceRoute:
+    Char91DotwellKnownChar93OauthProtectedResourceRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthRegistroRoute: AuthRegistroRoute,
   ConviteTokenRoute: ConviteTokenRoute,
   ETokenRoute: ETokenRoute,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
+  Char91DotmcpChar93InvokeToolToolRoute: Char91DotmcpChar93InvokeToolToolRoute,
   ApiPublicHooksDoseActionRoute: ApiPublicHooksDoseActionRoute,
   ApiPublicHooksSendMedicationRemindersRoute:
     ApiPublicHooksSendMedicationRemindersRoute,

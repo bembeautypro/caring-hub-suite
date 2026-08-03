@@ -14,7 +14,15 @@ import { onboardingRouteForStep } from "@/lib/onboarding/redirect";
 
 const searchSchema = z.object({
   invite: z.string().optional(),
+  redirect: z.string().optional(),
 });
+
+// Only same-origin relative paths are accepted as a post-login destination.
+function safeRedirect(value: string | undefined): string | null {
+  if (!value) return null;
+  if (!value.startsWith("/") || value.startsWith("//")) return null;
+  return value;
+}
 
 export const Route = createFileRoute("/auth/login")({
   head: () => ({ meta: [{ title: "Entrar — Amparo" }] }),
@@ -67,6 +75,12 @@ function Login() {
           );
           // Continue to normal onboarding flow even if invite fails
         }
+      }
+
+      const next = safeRedirect(search.redirect);
+      if (next) {
+        window.location.href = next;
+        return;
       }
 
       const userId = data.user?.id;
