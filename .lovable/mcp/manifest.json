@@ -1,0 +1,211 @@
+{
+  "version": 1,
+  "sdk_version": "0.26.1",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://bdjsohpmlhvuxoveuniu.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "family-care-hub",
+      "version": "0.1.0",
+      "title": "Family Care Hub"
+    },
+    "tools": [
+      {
+        "name": "list_patients",
+        "title": "Listar familiares",
+        "description": "Lista os familiares (pacientes) que o usuário autenticado acompanha no Amparo, com dados básicos de saúde.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "limit": {
+              "description": "Máximo de registros (padrão 20).",
+              "type": "integer",
+              "minimum": -9007199254740991,
+              "maximum": 9007199254740991
+            }
+          }
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_medications",
+        "title": "Listar medicamentos",
+        "description": "Lista os medicamentos de um familiar (paciente) no Amparo, com dosagem, frequência e horários.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "patient_id": {
+              "type": "string",
+              "description": "ID do familiar (use list_patients)."
+            },
+            "status": {
+              "description": "Filtro de status: active, paused ou ended.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "patient_id"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_appointments",
+        "title": "Listar compromissos",
+        "description": "Lista consultas, exames e outros compromissos de saúde de um familiar no Amparo.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "patient_id": {
+              "type": "string",
+              "description": "ID do familiar (use list_patients)."
+            },
+            "status": {
+              "description": "Filtro: scheduled, completed ou cancelled.",
+              "type": "string"
+            },
+            "from": {
+              "description": "Data/hora ISO inicial para filtrar (ex.: 2026-08-01T00:00:00Z).",
+              "type": "string"
+            }
+          },
+          "required": [
+            "patient_id"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_clinical_events",
+        "title": "Listar histórico clínico",
+        "description": "Lista eventos do histórico clínico de um familiar no Amparo (diagnósticos, internações, sintomas etc.).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "patient_id": {
+              "type": "string",
+              "description": "ID do familiar (use list_patients)."
+            },
+            "severity": {
+              "description": "Filtro de gravidade: low, medium, high ou critical.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "patient_id"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "search_documents",
+        "title": "Buscar documentos",
+        "description": "Busca documentos médicos de um familiar no Amparo por título, instituição ou médico. Retorna apenas metadados, nunca o arquivo.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "patient_id": {
+              "type": "string",
+              "description": "ID do familiar (use list_patients)."
+            },
+            "query": {
+              "description": "Termo de busca livre.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "patient_id"
+          ]
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "create_appointment",
+        "title": "Criar compromisso",
+        "description": "Agenda uma nova consulta, exame ou compromisso de saúde para um familiar no Amparo.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "patient_id": {
+              "type": "string",
+              "description": "ID do familiar (use list_patients)."
+            },
+            "title": {
+              "type": "string",
+              "description": "Título do compromisso."
+            },
+            "type": {
+              "type": "string",
+              "description": "Tipo: consulta, exame, procedimento, vacina, terapia ou outro."
+            },
+            "scheduled_at": {
+              "type": "string",
+              "description": "Data/hora ISO do compromisso."
+            },
+            "specialty": {
+              "type": "string"
+            },
+            "doctor_name": {
+              "type": "string"
+            },
+            "location": {
+              "type": "string"
+            },
+            "notes": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "patient_id",
+            "title",
+            "type",
+            "scheduled_at"
+          ]
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
