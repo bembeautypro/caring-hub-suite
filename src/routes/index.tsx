@@ -11,6 +11,14 @@ export const Route = createFileRoute("/")({
         content:
           "Organize remédios, exames, consultas e emergências de quem você cuida.",
       },
+      { property: "og:title", content: "Amparo — A saúde da sua família em um só lugar" },
+      {
+        property: "og:description",
+        content:
+          "Organize remédios, exames, consultas e emergências de quem você cuida.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
     ],
   }),
   component: Welcome,
